@@ -24,43 +24,40 @@
 % For Linux versions of MATLAB, please follow the instructions to install
 % the libps2000 and libpswrappers packages from http://www.picotech.com/linux.html
 
-% Identify architecture
+% Add libps2000 and MATLAB lib to path
+addpath(genpath('./libps2000'));
+addpath(genpath('./lib'));
 
+% Identify architecture
 archStr = computer('arch');
+
+if ~isdir(archStr)
+  mkdir(archStr);
+end
+
+cd(archStr);
+copyfile('../libps2000/include/*.h', './');
+
+% Create M files and thunk files
+[ps2000NotFound, ps2000Warnings] = loadlibrary('libps2000', 'libps2000.h', ...
+  'mfilename', 'ps2000MFile.m', 'alias', 'ps2000');
+
+[ps2000WrapNotFound, ps2000WrapWarnings] = loadlibrary('libps2000Wrap', ...
+  'libps2000Wrap.h', 'mfilename', 'ps2000WrapMFile.m', 'includepath', './',...
+  'alias', 'ps2000Wrap');
+
+cd ../
 
 try
 
-    addpath(strcat('./', archStr, '/'));
+  addpath(strcat('./', archStr, '/'));
     
 catch err
     
-    error('Operating system not supported: please contact support@picotech.com');
+  error('Operating system not supported: please contact support@picotech.com');
     
 end
 
-% Set path to the Functions folder, PicoStatus.m and PicoConstants.m files
-% Path to drivers on Linux operating systems will also be set.
-
-if(isunix)
-    
-    addpath('../Functions');	% Common functions
-    
-    if(~ismac) % Linux
-        
-        addpath('/opt/picoscope/lib/')  %Edit to specify location of .so files or place .so files in same directory
-    
-    end
-    
-else
-    
-    % Microsoft Windows operating system
-    
-    addpath(''); %Edit to specify location of dll files or place dlls in the same directory
-    addpath('..\Functions');
-    
-end
-
-addpath('..');   % PicoStatus.m & PicoConstants.m
 
 %% LOAD ENUMS AND STRUCTURES
 
